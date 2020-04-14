@@ -1,41 +1,62 @@
 #!/usr/bin/env python
 
 import argparse
+import json
 import os
 import sys
-import MySQLdb
+import pymysql.cursors
 import db
 import run_table
 import qc_analysis
 import fastqc
 
+from pprint import pprint
 
-def main():
-    parser=optparse.ArgumentParser()
-    parser.add_argument("-i", "--input", type="string", dest="input")
-    parser.add_argument("-d", "--db_config", type="string", dest="db_config")
-    args = parser.parse_args()
-
+def main(args):
+    
     try:
         #read config file and get connection information
-        dbhost=""; dbuser="";password=""; dbname=""
+        dbhost = ""
+        dbuser = ""
+        password = ""
+        dbname = ""
+        port = None
         fh=open(args.db_config)
         firstline=fh.readline().strip().split("\t")[1].split(";")
         dbhost=firstline[1].split("=")[1]
+        if ':' in dbhost:
+            dbhost, port = dbhost.split(":")
+            port = int(port)
         dbname=firstline[0].split(":")[2]
         dbuser=fh.readline().strip().split("\t")[1]
         password=fh.readline().strip().split("\t")[1]
-        # print(dbhost, dbuser, password, dbname)
-        conn= MySQLdb.connect(dbhost, dbuser, password, dbname)
+        print(
+            json.dumps(
+                {
+                    "dbhost": dbhost,
+                    "port": port,
+                    "dbuser": dbuser,
+                    "password": password,
+                    "dbname": dbname,
+                }
+            )
+        )
+        conn= pymysql.connect(
+            host=dbhost,
+            port=port,
+            user=dbuser,
+            passwd=password,
+            db=dbname,
+        )
     except:
         print("Could not get connection. Please check the database name.")
         exit(1)
 
-    run_table.add_header_scope("barcode", "analysis")
-    list_of_objs = run_table.parse_file(input_metafile)
-
+    # run_table.add_header_scope("barcode", "analysis")
+    list_of_objs = run_table.parse_file(args.input)
+    print(list_of_objs)
     #db.connect(config)
-    db = db.Database(conn)
+    database = db.Database(conn)
 
     for obj in list_of_objs:
         print(obj.data["property"])
@@ -44,11 +65,16 @@ def main():
         if os.path.exists(fast_qc_file):
             fastqc.parse_file(fast_qc_file, obj)
             # print("Inserting the record now: ")
-            db.insert_analysis(obj)
+            pprint(obj)
+            database.insert_analysis(obj)
         else:
             print("WARN: Unable to read file:", fast_qc_file)
 
     conn.close()
 
 if __name__ == "__main__":
-    main()
+    parser=argparse.ArgumentParser()
+    parser.add_argument("-i", "--input", dest="input")
+    parser.add_argument("-d", "--db_config", dest="db_config")
+    args = parser.parse_args()
+    main(args)
