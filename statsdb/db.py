@@ -1,14 +1,15 @@
-import MySQLdb
+import pymysql
 
 class Database:
-    type_scope={}
-    value_type={}
-    warn_printed={}
+    type_scope = {}
+    value_type = {}
+    warn_printed = {}
+
     def __init__(self, db):
         """
         """
-        self.db=db
-        self.dbc=self.db.cursor()
+        self.db = db
+        self.dbc = self.db.cursor()
         #con = {"connection": None, 
         #       "db_user": None,
         #       "db_password": None,
@@ -22,7 +23,7 @@ class Database:
         try:
             config_fh = open(config_file)
         except IOError as err:
-            print "Cannot open file : ", config_file
+            print("Cannot open file : ", config_file)
             exit(1)
         for line in config_fh:
             line=line.strip()
@@ -45,7 +46,7 @@ class Database:
         num_successes=0
         for key in properties.keys():		
             value = properties[key]
-            #print "key: ", key, "value:", value
+            print("key: ", key, "value:", value)
             statement = "INSERT INTO analysis_property(analysis_id, property, value) VALUES (%d,\"%s\",\"%s\")" %(analysis.data["id"],str(key),str(value))
             #print(statement)
             try:
@@ -64,7 +65,7 @@ class Database:
     def get_value_id(self, value, atype, desc=""):
 
         if atype not in self.type_scope.keys():
-            #print "No ", atype, " in ", self.type_scope
+            #print("No ", atype, " in ", self.type_scope)
             qt = "SELECT id FROM type_scope WHERE scope = '" + atype + "';";
             #print qt
             try:
@@ -72,9 +73,9 @@ class Database:
                 #self.db.commit()
                 #print "Execution successful, statement = :", qt
             except:
-                print "Execution failed : ", qt
+                print("Execution failed : ", qt)
                 exit(1)
-                    records=self.dbc.fetchall()
+            records=self.dbc.fetchall()
             if records:
                 #print records
                 for outer_row in records:
@@ -87,14 +88,15 @@ class Database:
             else:
                 #Insert the new type!
                 #print "Not fetched all"
+
                 ins_t = "INSERT INTO type_scope (scope) VALUES (' " + atype + "')"
                 #print $ins_t."\n";
                 try:
                     self.dbc.execute(ins_t)
                     self.db.commit()
-                except MySQLdb.error as err:
-                    print "execution failed: statement: ", ins_t
-                    print err
+                except pymysql.InternalError as err:
+                    print("execution failed: statement: ", ins_t)
+                    print(err)
                     exit(1)
 
                 type_id = self.dbc.lastrowid
@@ -126,7 +128,7 @@ class Database:
                     self.db.commit()
                     # print("Execution successful, statement : ", ins_v)
                 except:
-                    print "Database error"
+                    print("Database error")
                     exit(1)
                 value_id =  self.dbc.lastrowid
                 self.value_type[value] = value_id
@@ -158,7 +160,7 @@ class Database:
                 inserted += self.dbc.rowcount()
             else:
                 if not warn_printed[key]:
-                    print "WARN: Value not defined '" + key + "'\n"
+                    print("WARN: Value not defined '" + key + "'\n")
                     warn_printed[key] = 1
         # print("From insert values, returning: ", inserted)
         return inserted
@@ -214,7 +216,7 @@ class Database:
                 # print("Number of Insertions : ", inserted)
             else:
                 if not warn_printed[each[1]]:
-                    print "WARN: Not defined " + each[1] + "\n"
+                    print("WARN: Not defined " + each[1] + "\n")
                     warn_printed[each[1]] = 1
         return inserted
 
@@ -230,8 +232,8 @@ class Database:
             self.dbc.execute(q)
             self.db.commit()
             # print "Execution successful, statement executed : ", q
-	except :
-            print "Execution failed, statement tried: ", q
+        except:
+            print("Execution failed, statement tried: ", q)
             exit(1)
 
         inserted = self.dbc.rowcount

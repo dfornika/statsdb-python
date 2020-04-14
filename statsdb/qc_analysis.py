@@ -1,6 +1,6 @@
 import re
 
-class New:
+class QcAnalysis:
     def __init__(self):
         self.data = {
             "id": None,
@@ -11,6 +11,15 @@ class New:
             "value_desc": {},
             "value_type": {}
         }
+
+
+    def __str__(self):
+        return str(self.data)
+
+
+    def __repr__(self):
+        return str(self.data)
+
 
     def add_property(self, Key, Value):
         """
@@ -57,8 +66,8 @@ class New:
     def get_position_value(self):
         return self.data["position_value"]
 
-    def add_valid_type(self, Value_type, Value_scope):
-        self.data["value_type"][Value_type] = Value_scope
+    def add_valid_type(self, value_type, value_scope):
+        self.data["value_type"][value_type] = value_scope
 
     def get_value_type(self):
         return self.data["value_type"], self.data["value_desc"]

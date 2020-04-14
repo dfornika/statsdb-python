@@ -52,11 +52,11 @@ line_functions["parse_overrepresented_kmer"] = 1
 header_keys["total duplicate percentage"] = "total_duplicate_percentage"
 
 def parse_file(filename, analysis):
-    print "Inside parse file : ", filename
+    print("Inside parse file : ", filename)
     if os.path.exists(filename):
         fh = open(filename)
     else:
-        print "Cannot open the file : ", filename
+        print("Cannot open the file : ", filename)
         exit(1)
     line=None
     module=None
@@ -128,7 +128,7 @@ def parse_Basic_Statistics(value1, value2):
         to_parse=to_parse.rstrip()
 
         if to_parse.startswith("#"):
-            print "it is a comment"
+            print("it is a comment")
         elif re.search(r'([\S| ]+)\t([\S| ]+)', to_parse):
             match=re.search(r'([\S| ]+)\t([\S| ]+)', to_parse)
             if match.group(1) == "Sequence length":
@@ -147,7 +147,7 @@ def parse_Basic_Statistics(value1, value2):
                     exit(1)
                 break;
         else:
-            print to_parse
+            print(to_parse)
 
 def parse_module(fh, analysis, prefix, function):
     done = 0
