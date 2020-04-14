@@ -1,9 +1,5 @@
 import qc_analysis
 
-def dictionary(mydict):
-    for key in mydict.keys():
-        print(key, mydict[key])
-
 
 header_scopes={}
 values={}
@@ -60,5 +56,5 @@ def parse_file(filename):
 
     return ret
 
-def get_property_from_QCanalysis(self, value):
+def get_property_from_qc_analysis(self, value):
     return self.analysis.get_property(value)
